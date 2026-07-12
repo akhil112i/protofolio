@@ -1,661 +1,109 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Akhil Ajay — Portfolio</title>
-
-    <!-- Fonts: Helvetica for body/headings, JetBrains Mono for the typewriter -->
-    <link
-      href="https://db.onlinewebfonts.com/c/5ac3fe7c6abd2f62067f266d89671492?family=HelveticaNowDisplay-Medium"
-      rel="stylesheet"
-    />
-    <link
-      href="https://db.onlinewebfonts.com/c/1aa3377e489837a26d019bba501e779d?family=HelveticaNowDisplayW01-Rg"
-      rel="stylesheet"
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-    <!-- Tailwind CSS via CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Bulletproof React 18 & Babel UMD Core Links -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <style>
-      :root {
-        --font-heading: "HelveticaNowDisplay-Medium", "Helvetica Neue", Arial, sans-serif;
-        --font-body: "HelveticaNowDisplayW01-Rg", "Helvetica Neue", Arial, sans-serif;
-        --font-mono: 'JetBrains Mono', monospace;
-        --electric-blue: #00d8ff;
-      }
-
-      body {
-        font-family: var(--font-body);
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1080p Resume Screen</title>
+<style>
+    body {
         margin: 0;
-        padding: 0;
-        overflow-x: hidden;
-        background-color: #0a0a0a;
-        color: #ffffff;
-      }
+        background-color: #111;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        color: white;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-      @keyframes blink {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0; }
-      }
+    /* 1080p Container (Locked to 16:9 aspect ratio) */
+    .video-container {
+        width: 100%;
+        max-width: 1920px;
+        aspect-ratio: 16 / 9;
+        /* Dark gradient background to simulate a paused video */
+        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8));
+        background-size: cover;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        overflow: hidden;
+    }
 
-      .blink-cursor {
-        animation: blink 1s step-end infinite;
-      }
+    /* Editable Video Title */
+    .video-title {
+        position: absolute;
+        top: 60px;
+        left: 80px;
+        font-size: 3.5rem;
+        font-weight: 600;
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+        margin: 0;
+        letter-spacing: 1px;
+    }
 
-      /* Scroll Reveal Animation Classes */
-      .reveal {
-        opacity: 0;
-        transform: translateY(40px);
-        transition: opacity 0.8s ease-out, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-      }
-      
-      .reveal.active {
-        opacity: 1;
-        transform: translateY(0);
-      }
-      
-      .delay-100 { transition-delay: 100ms; }
-      .delay-200 { transition-delay: 200ms; }
-      .delay-300 { transition-delay: 300ms; }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
+    /* Center Content (Resume Button) */
+    .center-ui {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-    <script type="text/babel">
-      const { useState, useEffect, useRef, useCallback } = React;
-      const { createRoot } = ReactDOM;
+    .resume-btn {
+        background-color: #e50914; 
+        color: white;
+        border: none;
+        padding: 18px 50px;
+        font-size: 1.8rem;
+        font-weight: bold;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.2s, transform 0.1s;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+    }
 
-      // ---------------- Scroll Reveal Hook ----------------
-      function useScrollReveal() {
-        useEffect(() => {
-          const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-              if (entry.isIntersecting) {
-                entry.target.classList.add('active');
-              }
-            });
-          }, { threshold: 0.15 });
+    .resume-btn:hover {
+        background-color: #f40612;
+        transform: scale(1.05);
+    }
 
-          const elements = document.querySelectorAll('.reveal');
-          elements.forEach(el => observer.observe(el));
+    .resume-btn:active {
+        transform: scale(0.95);
+    }
 
-          return () => observer.disconnect();
-        }, []);
-      }
+    /* SVG Play Icon */
+    .play-icon {
+        width: 30px;
+        height: 30px;
+        fill: currentColor;
+    }
+</style>
+</head>
+<body>
 
-      // ---------------- Advanced useTypewriter hook ----------------
-      function useTypewriter(phrases, typingSpeed = 50, deletingSpeed = 30, pauseTime = 2000) {
-        const [text, setText] = useState("");
-        const [isDeleting, setIsDeleting] = useState(false);
-        const [loopNum, setLoopNum] = useState(0);
+<div class="video-container">
+    
+    <!-- REPLACE THE NAME OF THE VIDEO HERE -->
+    <h1 class="video-title">YOUR VIDEO NAME HERE</h1>
 
-        useEffect(() => {
-          let timer;
-          const currentPhrase = phrases[loopNum % phrases.length];
+    <!-- ONLY RESUME BUTTON INCLUDED -->
+    <div class="center-ui">
+        <button class="resume-btn">
+            <svg class="play-icon" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+            Resume
+        </button>
+    </div>
+    
+</div>
 
-          if (isDeleting) {
-            timer = setTimeout(() => {
-              setText(currentPhrase.substring(0, text.length - 1));
-            }, deletingSpeed);
-          } else {
-            timer = setTimeout(() => {
-              setText(currentPhrase.substring(0, text.length + 1));
-            }, typingSpeed);
-          }
-
-          if (!isDeleting && text === currentPhrase) {
-            timer = setTimeout(() => setIsDeleting(true), pauseTime);
-          } else if (isDeleting && text === "") {
-            setIsDeleting(false);
-            setLoopNum(loopNum + 1);
-          }
-
-          return () => clearTimeout(timer);
-        }, [text, isDeleting, loopNum, phrases, typingSpeed, deletingSpeed, pauseTime]);
-
-        return text;
-      }
-
-      // ---------------- useVideoScrub hook ----------------
-      const SENSITIVITY = 0.8;
-      function useVideoScrub(videoRef) {
-        const prevX = useRef(0);
-        const targetTime = useRef(0);
-        const isSeeking = useRef(false);
-        const queuedSeek = useRef(false);
-
-        const seekTo = useCallback(() => {
-          const video = videoRef.current;
-          if (!video) return;
-          if (isSeeking.current) {
-            queuedSeek.current = true;
-            return;
-          }
-          isSeeking.current = true;
-          const time = Math.max(0, Math.min(video.duration || 0, targetTime.current));
-          video.currentTime = time;
-        }, [videoRef]);
-
-        useEffect(() => {
-          const video = videoRef.current;
-          if (!video) return;
-
-          const handleSeeked = () => {
-            isSeeking.current = false;
-            if (queuedSeek.current) {
-              queuedSeek.current = false;
-              seekTo();
-            }
-          };
-
-          const handleMouseMove = (e) => {
-            if (!video || !video.duration) return;
-            // Support both touch and mouse events for mobile scrubbing
-            const currentX = e.touches ? e.touches[0].clientX : e.clientX;
-            const delta = currentX - prevX.current;
-            prevX.current = currentX;
-            const timeDelta = (delta / window.innerWidth) * SENSITIVITY * video.duration;
-            targetTime.current += timeDelta;
-            targetTime.current = Math.max(0, Math.min(video.duration, targetTime.current));
-            seekTo();
-          };
-
-          const handleTouchStart = (e) => {
-             prevX.current = e.touches[0].clientX;
-          }
-
-          video.addEventListener("seeked", handleSeeked);
-          window.addEventListener("mousemove", handleMouseMove);
-          window.addEventListener("touchmove", handleMouseMove);
-          window.addEventListener("touchstart", handleTouchStart);
-
-          return () => {
-            video.removeEventListener("seeked", handleSeeked);
-            window.removeEventListener("mousemove", handleMouseMove);
-            window.removeEventListener("touchmove", handleMouseMove);
-            window.removeEventListener("touchstart", handleTouchStart);
-          };
-        }, [videoRef, seekTo]);
-      }
-
-      // ---------------- Navbar Component ----------------
-      const Navbar = () => {
-        const [menuOpen, setMenuOpen] = useState(false);
-        const [scrolled, setScrolled] = useState(false);
-
-        useEffect(() => {
-          const handleScroll = () => setScrolled(window.scrollY > 50);
-          window.addEventListener('scroll', handleScroll);
-          return () => window.removeEventListener('scroll', handleScroll);
-        }, []);
-
-        const navLinks = [
-          { name: "About", href: "#about" },
-          { name: "Projects", href: "#projects" },
-          { name: "Skills", href: "#skills" },
-          { name: "Experience", href: "#experience" },
-          { name: "Education", href: "#education" },
-        ];
-
-        return (
-          <>
-            <nav className={`fixed top-0 left-0 right-0 z-[100] px-6 sm:px-10 py-5 flex justify-between items-center transition-all duration-300 ${scrolled ? 'bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/10' : 'bg-transparent'}`}>
-              <div className="flex items-center gap-3 cursor-pointer hover:scale-105 transition-transform" onClick={() => window.scrollTo(0,0)}>
-                <span className="text-[22px] sm:text-[28px] tracking-tight text-white font-medium" style={{ fontFamily: "var(--font-heading)" }}>
-                  Akhil Ajay®
-                </span>
-                <span className="text-[26px] sm:text-[32px] text-[#00d8ff] select-none shadow-[#00d8ff]" style={{ letterSpacing: "-0.02em" }}>
-                  ✳︎
-                </span>
-              </div>
-
-              <div className="hidden lg:flex items-center gap-6 text-[18px] text-white/80">
-                {navLinks.map((link) => (
-                  <a key={link.name} href={link.href} className="hover:text-[#00d8ff] transition-colors cursor-pointer tracking-wide">
-                    {link.name}
-                  </a>
-                ))}
-              </div>
-
-              <div className="hidden lg:block">
-                <a href="mailto:akhil172003@gmail.com" className="text-[16px] font-medium text-[#0a0a0a] bg-white px-6 py-2.5 rounded-full hover:bg-[#00d8ff] hover:shadow-[0_0_20px_rgba(0,216,255,0.4)] transition-all duration-300">
-                  Contact Me
-                </a>
-              </div>
-
-              <button onClick={() => setMenuOpen(!menuOpen)} className="flex flex-col gap-[6px] lg:hidden z-[110]" aria-label="Toggle menu">
-                <span className={`w-7 h-[2px] bg-white transition-transform duration-300 ${menuOpen ? "rotate-45 translate-y-[8px]" : ""}`} />
-                <span className={`w-7 h-[2px] bg-white transition-opacity duration-300 ${menuOpen ? "opacity-0" : "opacity-100"}`} />
-                <span className={`w-7 h-[2px] bg-white transition-transform duration-300 ${menuOpen ? "-rotate-45 -translate-y-[8px]" : ""}`} />
-              </button>
-            </nav>
-
-            <div className={`fixed inset-0 z-[105] bg-[#0a0a0a]/98 backdrop-blur-md flex flex-col justify-center items-start px-10 gap-8 transition-all duration-300 lg:hidden ${menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
-              {navLinks.map((link) => (
-                <a key={link.name} href={link.href} className="text-[36px] font-medium text-white hover:text-[#00d8ff] transition-colors" onClick={() => setMenuOpen(false)}>
-                  {link.name}
-                </a>
-              ))}
-              <a href="mailto:akhil172003@gmail.com" className="text-[36px] font-medium text-white underline underline-offset-4 decoration-[#00d8ff] mt-4" onClick={() => setMenuOpen(false)}>
-                Get in touch
-              </a>
-            </div>
-          </>
-        );
-      };
-
-      // ---------------- Hero Component ----------------
-      const VIDEO_URL = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
-      
-      const Hero = () => {
-        const videoRef = useRef(null);
-        useVideoScrub(videoRef);
-        
-        const displayedText = useTypewriter([
-          "Engineering scalable web applications.",
-          "Crafting pixel-perfect user interfaces.",
-          "Architecting robust cloud solutions on AWS.",
-          "Transforming ideas into production-ready code."
-        ]);
-
-        return (
-          <section className="relative min-h-screen flex flex-col justify-center px-6 sm:px-12 md:px-20 overflow-hidden pt-20">
-            <video
-              ref={videoRef}
-              src={VIDEO_URL}
-              muted
-              playsInline
-              preload="auto"
-              className="fixed inset-0 z-0 object-cover w-full h-full"
-              style={{ objectPosition: "70% center" }}
-            />
-            <div className="fixed inset-0 bg-black/70 z-0 pointer-events-none" />
-
-            <div className="relative z-10 max-w-4xl">
-              <div className="pointer-events-none select-none mb-6 text-[#00d8ff] font-mono tracking-widest text-sm sm:text-base uppercase" style={{ fontFamily: "var(--font-mono)" }}>
-                Hello, Welcome to my portfolio
-              </div>
-              
-              <h1 className="text-white font-medium mb-6 leading-tight tracking-tight" style={{ fontFamily: "var(--font-heading)", fontSize: "clamp(45px, 7vw, 85px)" }}>
-                I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-[#888888]">Akhil Ajay.</span>
-              </h1>
-              
-              <div className="text-white/80 mb-8 max-w-2xl" style={{ fontSize: "clamp(20px, 3vw, 32px)", lineHeight: 1.4 }}>
-                Aspiring Software Developer & AWS Enthusiast.
-              </div>
-
-              <div className="text-[#00d8ff] font-medium mb-12 h-[60px] sm:h-[40px] drop-shadow-[0_0_8px_rgba(0,216,255,0.4)]" style={{ fontSize: "clamp(16px, 2vw, 22px)", fontFamily: "var(--font-mono)" }}>
-                &gt; {displayedText}
-                <span className="inline-block w-[10px] h-[1.1em] bg-[#00d8ff] align-middle ml-[6px] blink-cursor shadow-[0_0_10px_rgba(0,216,255,0.6)]" />
-              </div>
-
-              <div className="flex flex-wrap gap-5">
-                <a href="#projects" className="bg-white text-black font-medium rounded-full text-[16px] px-8 py-4 hover:scale-105 hover:bg-[#00d8ff] transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_25px_rgba(0,216,255,0.5)]">
-                  Explore My Work
-                </a>
-                <a href="mailto:akhil172003@gmail.com" className="bg-[#0a0a0a]/50 backdrop-blur-sm text-white border border-white/30 rounded-full text-[16px] px-8 py-4 hover:bg-white hover:text-black hover:border-white transition-all duration-300">
-                  Let's Connect
-                </a>
-              </div>
-            </div>
-          </section>
-        );
-      };
-
-      // ---------------- About Component ----------------
-      const About = () => (
-        <section id="about" className="py-32 px-6 sm:px-12 md:px-20 max-w-7xl mx-auto">
-          <span className="reveal text-sm uppercase tracking-widest text-[#00d8ff] mb-4 block" style={{ fontFamily: "var(--font-mono)" }}>01 / About Me</span>
-          <h2 className="reveal text-[36px] sm:text-[50px] font-medium tracking-tight mb-10" style={{ fontFamily: "var(--font-heading)" }}>
-            Bridging the gap between <br className="hidden sm:block"/> logic and user experience.
-          </h2>
-          <div className="grid md:grid-cols-2 gap-12 text-[18px] sm:text-[20px] text-white/70 leading-relaxed">
-            <p className="reveal delay-100">
-              I am an MCA student deeply passionate about software engineering, cloud architecture, and creating applications that drive real value. My journey began with a Bachelor of Computer Applications (BCA) from Kerala University, where I developed a strong foundation in programming and logic.
-            </p>
-            <p className="reveal delay-200">
-              Today, I focus on building comprehensive digital solutions—from responsive front-end interfaces to secure, scalable backend architectures. Driven by continuous learning, I actively explore AWS services to ensure the applications I build are not just functional, but ready for the modern web.
-            </p>
-          </div>
-        </section>
-      );
-
-      // ---------------- Projects Component ----------------
-      const Projects = () => {
-        const projectList = [
-          {
-            title: "Fill My Bowl",
-            desc: "A smart restaurant management and food recommendation platform. It leverages user location data to suggest popular nearby dishes while providing restaurants with tools for seamless seat reservations and digital queue management, effectively reducing wait times and improving dining experiences.",
-            tags: ["Full-Stack", "Location API", "UI/UX", "Database Management"]
-          },
-          {
-            title: "Halo Cycle Rental",
-            desc: "An eco-friendly, web-based bicycle rental application. Designed to promote sustainable urban mobility, it allows users to locate nearby rental hubs in real-time, book cycles, and securely process prepaid payments through an integrated gateway.",
-            tags: ["Web Dev", "Payment Integration", "Real-time Booking"]
-          },
-          {
-            title: "Cloud Resource Manager",
-            desc: "An academic project focused on cloud infrastructure. Built to demonstrate automated file storage and retrieval using AWS S3 and EC2. It features a streamlined dashboard for users to securely upload and organize assets with robust identity access management.",
-            tags: ["AWS S3", "EC2", "Cloud Architecture", "Security"]
-          }
-        ];
-
-        return (
-          <section id="projects" className="py-32 px-6 sm:px-12 md:px-20 max-w-7xl mx-auto border-t border-white/10">
-            <span className="reveal text-sm uppercase tracking-widest text-[#00d8ff] mb-4 block" style={{ fontFamily: "var(--font-mono)" }}>02 / Featured Work</span>
-            <h2 className="reveal text-[36px] sm:text-[50px] font-medium tracking-tight mb-16" style={{ fontFamily: "var(--font-heading)" }}>
-              Selected Projects
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {projectList.map((p, idx) => (
-                <div key={idx} className={`reveal delay-${(idx + 1) * 100} group border border-white/10 rounded-3xl p-8 flex flex-col justify-between bg-[#111111] hover:bg-[#151515] hover:-translate-y-3 hover:border-[#00d8ff]/50 hover:shadow-[0_10px_30px_rgba(0,216,255,0.1)] transition-all duration-500 cursor-pointer`}>
-                  <div>
-                    <h3 className="text-[26px] font-medium mb-4 group-hover:text-[#00d8ff] transition-colors" style={{ fontFamily: "var(--font-heading)" }}>{p.title}</h3>
-                    <p className="text-white/60 mb-8 text-[16px] leading-relaxed">{p.desc}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-auto">
-                    {p.tags.map((tag, tIdx) => (
-                      <span key={tIdx} className="text-[13px] bg-black border border-white/10 px-4 py-1.5 rounded-full text-white/80 group-hover:border-[#00d8ff]/40 transition-colors">{tag}</span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        );
-      };
-
-      // ---------------- Skills Component ----------------
-      const Skills = () => {
-        const skillCategories = [
-          { title: "Frontend & Design", skills: ["React.js", "JavaScript (ES6+)", "Tailwind CSS", "Bootstrap", "GSAP", "Lenis", "HTML5 & CSS3"] },
-          { title: "Backend & Databases", skills: ["Node.js", "Python", "Java", "MySQL", "MongoDB"] },
-          { title: "Cloud & Architecture", skills: ["AWS (EC2, S3, RDS)", "Git & GitHub", "RESTful APIs"] },
-        ];
-
-        return (
-          <section id="skills" className="py-32 px-6 sm:px-12 md:px-20 max-w-7xl mx-auto border-t border-white/10">
-            <span className="reveal text-sm uppercase tracking-widest text-[#00d8ff] mb-4 block" style={{ fontFamily: "var(--font-mono)" }}>03 / Expertise</span>
-            <h2 className="reveal text-[36px] sm:text-[50px] font-medium tracking-tight mb-16" style={{ fontFamily: "var(--font-heading)" }}>
-              Skills & Tech Stack
-            </h2>
-            <div className="grid md:grid-cols-3 gap-10">
-              {skillCategories.map((cat, idx) => (
-                <div key={idx} className={`reveal delay-${(idx + 1) * 100} bg-[#111111] p-8 rounded-3xl border border-white/10 hover:border-[#00d8ff]/30 transition-colors group`}>
-                  <h3 className="text-[22px] font-medium mb-6 text-white group-hover:text-[#00d8ff] transition-colors" style={{ fontFamily: "var(--font-heading)" }}>{cat.title}</h3>
-                  <div className="flex flex-wrap gap-3">
-                    {cat.skills.map((s, sIdx) => (
-                      <span key={sIdx} className="text-[15px] bg-black border border-white/10 px-4 py-2 rounded-xl text-white/70 hover:text-white hover:bg-[#00d8ff]/10 hover:border-[#00d8ff]/50 hover:shadow-[0_0_15px_rgba(0,216,255,0.2)] transition-all cursor-default">
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        );
-      };
-
-      // ---------------- Experience Component ----------------
-      const Experience = () => (
-        <section id="experience" className="py-32 px-6 sm:px-12 md:px-20 max-w-7xl mx-auto border-t border-white/10">
-          <span className="reveal text-sm uppercase tracking-widest text-[#00d8ff] mb-4 block" style={{ fontFamily: "var(--font-mono)" }}>04 / Work</span>
-          <h2 className="reveal text-[36px] sm:text-[50px] font-medium tracking-tight mb-16" style={{ fontFamily: "var(--font-heading)" }}>
-            Professional Experience
-          </h2>
-          <div className="border-l-2 border-white/10 pl-8 md:pl-12 space-y-12 max-w-4xl relative">
-            
-            <div className="absolute w-4 h-4 bg-[#00d8ff] rounded-full -left-[9px] top-2 shadow-[0_0_15px_rgba(0,216,255,0.8)]"></div>
-
-            <div className="reveal delay-100 group">
-              <div className="flex flex-wrap items-center gap-4 mb-3">
-                <span className="text-sm text-[#00d8ff] bg-[#00d8ff]/10 px-3 py-1.5 rounded-md" style={{ fontFamily: "var(--font-mono)" }}>Internship</span>
-                <span className="text-[16px] text-white/60 font-medium">Trinity Technologies</span>
-              </div>
-              <h4 className="text-[26px] sm:text-[30px] font-medium mt-2 text-white group-hover:text-[#00d8ff] transition-colors" style={{ fontFamily: "var(--font-heading)" }}>AWS Cloud Intern</h4>
-              <ul className="text-white/70 mt-6 text-[17px] leading-relaxed space-y-4 list-none">
-                <li className="flex items-start gap-3">
-                  <span className="text-[#00d8ff] mt-1 text-xl">▹</span> 
-                  <span>Collaborated directly with cloud architects to design, configure, and manage infrastructure on <strong>Amazon Web Services (AWS)</strong>.</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-[#00d8ff] mt-1 text-xl">▹</span> 
-                  <span>Gained hands-on expertise in deploying applications using core services like <strong>EC2, S3 buckets, and RDS databases</strong>.</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-[#00d8ff] mt-1 text-xl">▹</span> 
-                  <span>Studied and implemented cloud security best practices, focusing on <strong>Identity and Access Management (IAM)</strong> roles and VPC configurations.</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
-      );
-
-      // ---------------- Education Component ----------------
-      const Education = () => (
-        <section id="education" className="py-32 px-6 sm:px-12 md:px-20 max-w-7xl mx-auto border-t border-white/10">
-          <span className="reveal text-sm uppercase tracking-widest text-[#00d8ff] mb-4 block" style={{ fontFamily: "var(--font-mono)" }}>05 / Academics</span>
-          <h2 className="reveal text-[36px] sm:text-[50px] font-medium tracking-tight mb-16" style={{ fontFamily: "var(--font-heading)" }}>
-            Education
-          </h2>
-          
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="reveal delay-100 bg-[#111111] border border-white/10 rounded-3xl p-8 hover:bg-[#151515] hover:border-[#00d8ff]/30 transition-colors">
-              <div className="flex justify-between items-start mb-4">
-                <span className="text-sm text-green-400 bg-green-400/10 px-3 py-1.5 rounded-md inline-block" style={{ fontFamily: "var(--font-mono)" }}>Currently Pursuing</span>
-              </div>
-              <h4 className="text-[24px] font-medium text-white mb-2 leading-tight" style={{ fontFamily: "var(--font-heading)" }}>Master of Computer Applications (MCA)</h4>
-              <p className="text-white/60 text-[16px] mt-4 leading-relaxed">
-                Focusing on advanced computing methodologies, scalable software engineering, cloud architecture, and full-stack application development.
-              </p>
-            </div>
-
-            <div className="reveal delay-200 bg-[#111111] border border-white/10 rounded-3xl p-8 hover:bg-[#151515] hover:border-white/30 transition-colors">
-              <div className="flex justify-between items-start mb-4">
-                <span className="text-sm text-white/50 bg-white/10 px-3 py-1.5 rounded-md inline-block" style={{ fontFamily: "var(--font-mono)" }}>Graduated</span>
-              </div>
-              <h4 className="text-[24px] font-medium text-white mb-2 leading-tight" style={{ fontFamily: "var(--font-heading)" }}>Bachelor of Computer Applications (BCA)</h4>
-              <span className="text-[16px] text-[#00d8ff] block mb-4">Kerala University</span>
-              <p className="text-white/60 text-[16px] leading-relaxed">
-                Built a robust academic foundation in Object-Oriented Programming, relational database management, data structures, and web technologies.
-              </p>
-            </div>
-
-            <div className="reveal delay-300 bg-[#111111] border border-white/10 rounded-3xl p-8 hover:bg-[#151515] hover:border-white/30 transition-colors md:col-span-2 flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div>
-                <span className="text-sm text-white/50 bg-white/10 px-3 py-1.5 rounded-md inline-block mb-4" style={{ fontFamily: "var(--font-mono)" }}>Completed</span>
-                <h4 className="text-[24px] font-medium text-white mb-1" style={{ fontFamily: "var(--font-heading)" }}>Higher Secondary Education</h4>
-                <span className="text-[16px] text-white/60 block">Specialized in Computer Science</span>
-              </div>
-              <div className="text-white/40 text-sm italic">
-                The starting point of my logical reasoning and coding journey.
-              </div>
-            </div>
-          </div>
-        </section>
-      );
-
-      // ---------------- Contact/Footer Component with Custom Video Controls ----------------
-      const Contact = () => {
-        const outroVideoRef = useRef(null);
-        
-        // Track states
-        const [revealStep, setRevealStep] = useState(0); // 0: Hidden, 1: Typing, 2: Video
-        const [dragonText, setDragonText] = useState("");
-        const [hasPlayed, setHasPlayed] = useState(false); // Tracks if the video has been revealed before
-
-        // HIDE TO BACKSTAGE ON SCROLL UP
-        useEffect(() => {
-          if (revealStep === 0) return;
-
-          let lastScrollY = window.scrollY;
-          
-          const handleScroll = () => {
-            const currentScrollY = window.scrollY;
-            
-            // If the user scrolls up by more than 20 pixels, hide the video
-            if (lastScrollY - currentScrollY > 20) {
-              setRevealStep(0);
-              if (outroVideoRef.current) {
-                outroVideoRef.current.pause();
-                // We purposefully do NOT reset currentTime here so they can resume it
-              }
-            }
-            lastScrollY = currentScrollY;
-          };
-
-          window.addEventListener('scroll', handleScroll, { passive: true });
-          return () => window.removeEventListener('scroll', handleScroll);
-        }, [revealStep]);
-
-        // Typewriter Effect for the hidden easter egg
-        useEffect(() => {
-          if (revealStep === 1) {
-            const fullText = "I'm Dragon Warrior";
-            let i = 0;
-            const interval = setInterval(() => {
-              setDragonText(fullText.slice(0, i + 1));
-              i++;
-              if (i === fullText.length) {
-                clearInterval(interval);
-                // Pause for a moment after typing before showing the video
-                setTimeout(() => {
-                  setRevealStep(2);
-                  setHasPlayed(true); // Mark as played so the button becomes "Resume"
-                }, 1200);
-              }
-            }, 120);
-            return () => clearInterval(interval);
-          }
-        }, [revealStep]);
-
-        // Auto-play video when revealed
-        useEffect(() => {
-          if (revealStep === 2 && outroVideoRef.current) {
-            outroVideoRef.current.play().catch(e => console.error("Video play failed:", e));
-          }
-        }, [revealStep]);
-
-        // Hide to backstage when the video container is clicked
-        const handleVideoClick = () => {
-          if (outroVideoRef.current) {
-            outroVideoRef.current.pause();
-            setRevealStep(0); // Send it to the backstage
-          }
-        };
-
-        // Handle the trigger button logic (End Credits vs Resume)
-        const handleTriggerClick = () => {
-          if (hasPlayed) {
-            // If they are resuming, skip the typing animation and go straight to the video
-            setRevealStep(2);
-          } else {
-            // First time playing, show the typing animation
-            setRevealStep(1);
-          }
-        };
-
-        return (
-          <footer id="contact" className="py-40 px-6 sm:px-12 md:px-20 max-w-7xl mx-auto border-t border-white/10 flex flex-col items-center text-center relative">
-            
-            <div className="reveal max-w-3xl flex flex-col items-center w-full">
-              <h2 className="text-[45px] sm:text-[65px] font-medium tracking-tight mb-6 leading-tight" style={{ fontFamily: "var(--font-heading)" }}>
-                Let's build something <br className="hidden sm:block"/> incredible together.
-              </h2>
-              <p className="text-white/60 text-[20px] mb-12 leading-relaxed">
-                I am actively seeking entry-level software engineering roles and cloud computing opportunities. My inbox is always open for collaborations or just to say hi.
-              </p>
-              
-              <div className="flex flex-col items-center gap-8 mb-16">
-                <a href="mailto:akhil172003@gmail.com" className="inline-block bg-white text-[#0a0a0a] font-medium px-10 py-5 rounded-full text-[18px] hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] transition-all duration-300">
-                  Get in Touch →
-                </a>
-              </div>
-            </div>
-            
-            <div className="w-full pt-24 mt-12 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center text-white/40 text-[15px] gap-4" style={{ fontFamily: "var(--font-mono)" }}>
-              <span>© {new Date().getFullYear()} Akhil Ajay. All rights reserved.</span>
-              <span>Designed & Built with React & Tailwind</span>
-            </div>
-
-            {/* The trigger button (Changes to Resume after first play) */}
-            {revealStep === 0 && (
-              <button 
-                onClick={handleTriggerClick}
-                className="mt-8 text-[11px] text-[#111111] hover:text-[#00d8ff] transition-colors duration-700 cursor-pointer uppercase tracking-widest outline-none"
-                style={{ fontFamily: "var(--font-mono)" }}
-              >
-                {hasPlayed ? "Resume" : "End Credits"}
-              </button>
-            )}
-
-            {/* Secret Easter Egg Area */}
-            {revealStep > 0 && (
-              <div className="w-full max-w-2xl flex flex-col items-center justify-center gap-8 mt-16 min-h-[100px]">
-                
-                {/* Typing Stage */}
-                {revealStep === 1 && (
-                  <div className="text-[#00d8ff] text-[24px] sm:text-[32px] font-medium tracking-widest uppercase drop-shadow-[0_0_15px_rgba(0,216,255,0.6)]" style={{ fontFamily: "var(--font-mono)" }}>
-                    {dragonText}<span className="blink-cursor inline-block w-[12px] h-[1em] bg-[#00d8ff] align-middle ml-2"></span>
-                  </div>
-                )}
-                
-                {/* Video Reveal Stage */}
-                {revealStep === 2 && (
-                  <div 
-                    className="w-full rounded-2xl overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(0,216,255,0.1)] cursor-pointer animate-[fadeIn_1s_ease-out_forwards]"
-                    onClick={handleVideoClick}
-                    title="Click to hide video"
-                  >
-                    <video 
-                      ref={outroVideoRef}
-                      src="vidssave.com It's Blank Meme Template HD 1080P.mp4" 
-                      loop
-                      playsInline
-                      className="w-full h-auto"
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-          </footer>
-        );
-      };
-
-      // ---------------- Main App Component ----------------
-      const App = () => {
-        useScrollReveal();
-        return (
-          <>
-            <Navbar />
-            <main>
-              <Hero />
-              <About />
-              <Projects />
-              <Skills />
-              <Experience />
-              <Education />
-            </main>
-            <Contact />
-          </>
-        );
-      };
-
-      const root = createRoot(document.getElementById('root'));
-      root.render(<App />);
-    </script>
-  </body>
+</body>
 </html>
