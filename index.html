@@ -213,7 +213,7 @@
             <nav className={`fixed top-0 left-0 right-0 z-[100] px-6 sm:px-10 py-5 flex justify-between items-center transition-all duration-300 ${scrolled ? 'bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/10' : 'bg-transparent'}`}>
               <div className="flex items-center gap-3 cursor-pointer hover:scale-105 transition-transform" onClick={() => window.scrollTo(0,0)}>
                 <span className="text-[22px] sm:text-[28px] tracking-tight text-white font-medium" style={{ fontFamily: "var(--font-heading)" }}>
-                  Akhil Ajay®
+                  Akhil Ajay
                 </span>
                 <span className="text-[26px] sm:text-[32px] text-[#00d8ff] select-none shadow-[#00d8ff]" style={{ letterSpacing: "-0.02em" }}>
                   ✳︎
@@ -591,11 +591,11 @@
               <span>Designed & Built with React & Tailwind</span>
             </div>
 
-            {/* The Resume button is now ALWAYS labeled "Resume" */}
+            {/* The Resume button acts as an Easter Egg - Hidden by matching background color and small size */}
             {revealStep === 0 && (
               <button 
                 onClick={handleTriggerClick}
-                className="mt-8 text-[11px] text-[#111111] hover:text-[#00d8ff] transition-colors duration-700 cursor-pointer uppercase tracking-widest outline-none"
+                className="mt-8 text-[9px] text-[#0c0c0c] hover:text-[#00d8ff] transition-colors duration-500 cursor-default hover:cursor-pointer uppercase tracking-widest outline-none"
                 style={{ fontFamily: "var(--font-mono)" }}
               >
                 Resume
