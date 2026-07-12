@@ -161,7 +161,8 @@
 
           const handleMouseMove = (e) => {
             if (!video || !video.duration) return;
-            const currentX = e.clientX;
+            // Support both touch and mouse events for mobile scrubbing
+            const currentX = e.touches ? e.touches[0].clientX : e.clientX;
             const delta = currentX - prevX.current;
             prevX.current = currentX;
             const timeDelta = (delta / window.innerWidth) * SENSITIVITY * video.duration;
@@ -170,12 +171,20 @@
             seekTo();
           };
 
+          const handleTouchStart = (e) => {
+             prevX.current = e.touches[0].clientX;
+          }
+
           video.addEventListener("seeked", handleSeeked);
           window.addEventListener("mousemove", handleMouseMove);
+          window.addEventListener("touchmove", handleMouseMove);
+          window.addEventListener("touchstart", handleTouchStart);
 
           return () => {
             video.removeEventListener("seeked", handleSeeked);
             window.removeEventListener("mousemove", handleMouseMove);
+            window.removeEventListener("touchmove", handleMouseMove);
+            window.removeEventListener("touchstart", handleTouchStart);
           };
         }, [videoRef, seekTo]);
       }
@@ -204,7 +213,7 @@
             <nav className={`fixed top-0 left-0 right-0 z-[100] px-6 sm:px-10 py-5 flex justify-between items-center transition-all duration-300 ${scrolled ? 'bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/10' : 'bg-transparent'}`}>
               <div className="flex items-center gap-3 cursor-pointer hover:scale-105 transition-transform" onClick={() => window.scrollTo(0,0)}>
                 <span className="text-[22px] sm:text-[28px] tracking-tight text-white font-medium" style={{ fontFamily: "var(--font-heading)" }}>
-                  Akhil Ajay
+                  Akhil Ajay®
                 </span>
                 <span className="text-[26px] sm:text-[32px] text-[#00d8ff] select-none shadow-[#00d8ff]" style={{ letterSpacing: "-0.02em" }}>
                   ✳︎
@@ -369,7 +378,6 @@
 
       // ---------------- Skills Component ----------------
       const Skills = () => {
-        // UPDATED: Removed Figma, Postman, Docker. Added Bootstrap, GSAP, Lenis.
         const skillCategories = [
           { title: "Frontend & Design", skills: ["React.js", "JavaScript (ES6+)", "Tailwind CSS", "Bootstrap", "GSAP", "Lenis", "HTML5 & CSS3"] },
           { title: "Backend & Databases", skills: ["Node.js", "Python", "Java", "MySQL", "MongoDB"] },
@@ -480,50 +488,173 @@
         </section>
       );
 
-      // ---------------- Contact/Footer Component ----------------
-      const Contact = () => (
-        <footer id="contact" className="py-40 px-6 sm:px-12 md:px-20 max-w-7xl mx-auto border-t border-white/10 flex flex-col items-center text-center gap-8">
-          <div className="reveal max-w-3xl">
-            <h2 className="text-[45px] sm:text-[65px] font-medium tracking-tight mb-6 leading-tight" style={{ fontFamily: "var(--font-heading)" }}>
-              Let's build something <br className="hidden sm:block"/> incredible together.
-            </h2>
-            <p className="text-white/60 text-[20px] mb-12 leading-relaxed">
-              I am actively seeking entry-level software engineering roles and cloud computing opportunities. My inbox is always open for collaborations or just to say hi.
-            </p>
-            <a href="mailto:akhil172003@gmail.com" className="inline-block bg-white text-[#0a0a0a] font-medium px-10 py-5 rounded-full text-[18px] hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] transition-all duration-300">
-              Get in Touch →
-            </a>
-          </div>
-          
-          <div className="w-full pt-24 mt-12 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center text-white/40 text-[15px] gap-4" style={{ fontFamily: "var(--font-mono)" }}>
-            <span>© {new Date().getFullYear()} Akhil Ajay. All rights reserved.</span>
-            <span>Designed & Built with React & Tailwind</span>
-          </div>
-        </footer>
-      );
+      // ---------------- Contact/Footer Component with Custom Video Controls ----------------
+      const Contact = () => {
+        const outroVideoRef = useRef(null);
+        
+        // Track states
+        const [revealStep, setRevealStep] = useState(0); // 0: Hidden, 1: Typing, 2: Video
+        const [dragonText, setDragonText] = useState("");
+        const [hasPlayed, setHasPlayed] = useState(false); // Tracks if the video has been revealed before
 
-      // ---------------- Main App Component ----------------
-      function App() {
-        useScrollReveal();
+        // HIDE TO BACKSTAGE ON SCROLL UP
+        useEffect(() => {
+          if (revealStep === 0) return;
+
+          let lastScrollY = window.scrollY;
+          
+          const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            
+            // If the user scrolls up by more than 20 pixels, hide the video
+            if (lastScrollY - currentScrollY > 20) {
+              setRevealStep(0);
+              if (outroVideoRef.current) {
+                outroVideoRef.current.pause();
+                // We purposefully do NOT reset currentTime here so they can resume it
+              }
+            }
+            lastScrollY = currentScrollY;
+          };
+
+          window.addEventListener('scroll', handleScroll, { passive: true });
+          return () => window.removeEventListener('scroll', handleScroll);
+        }, [revealStep]);
+
+        // Typewriter Effect for the hidden easter egg
+        useEffect(() => {
+          if (revealStep === 1) {
+            const fullText = "I'm Dragon Warrior";
+            let i = 0;
+            const interval = setInterval(() => {
+              setDragonText(fullText.slice(0, i + 1));
+              i++;
+              if (i === fullText.length) {
+                clearInterval(interval);
+                // Pause for a moment after typing before showing the video
+                setTimeout(() => {
+                  setRevealStep(2);
+                  setHasPlayed(true); // Mark as played so the button becomes "Resume"
+                }, 1200);
+              }
+            }, 120);
+            return () => clearInterval(interval);
+          }
+        }, [revealStep]);
+
+        // Auto-play video when revealed
+        useEffect(() => {
+          if (revealStep === 2 && outroVideoRef.current) {
+            outroVideoRef.current.play().catch(e => console.error("Video play failed:", e));
+          }
+        }, [revealStep]);
+
+        // Hide to backstage when the video container is clicked
+        const handleVideoClick = () => {
+          if (outroVideoRef.current) {
+            outroVideoRef.current.pause();
+            setRevealStep(0); // Send it to the backstage
+          }
+        };
+
+        // Handle the trigger button logic (End Credits vs Resume)
+        const handleTriggerClick = () => {
+          if (hasPlayed) {
+            // If they are resuming, skip the typing animation and go straight to the video
+            setRevealStep(2);
+          } else {
+            // First time playing, show the typing animation
+            setRevealStep(1);
+          }
+        };
 
         return (
-          <div>
+          <footer id="contact" className="py-40 px-6 sm:px-12 md:px-20 max-w-7xl mx-auto border-t border-white/10 flex flex-col items-center text-center relative">
+            
+            <div className="reveal max-w-3xl flex flex-col items-center w-full">
+              <h2 className="text-[45px] sm:text-[65px] font-medium tracking-tight mb-6 leading-tight" style={{ fontFamily: "var(--font-heading)" }}>
+                Let's build something <br className="hidden sm:block"/> incredible together.
+              </h2>
+              <p className="text-white/60 text-[20px] mb-12 leading-relaxed">
+                I am actively seeking entry-level software engineering roles and cloud computing opportunities. My inbox is always open for collaborations or just to say hi.
+              </p>
+              
+              <div className="flex flex-col items-center gap-8 mb-16">
+                <a href="mailto:akhil172003@gmail.com" className="inline-block bg-white text-[#0a0a0a] font-medium px-10 py-5 rounded-full text-[18px] hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] transition-all duration-300">
+                  Get in Touch →
+                </a>
+              </div>
+            </div>
+            
+            <div className="w-full pt-24 mt-12 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center text-white/40 text-[15px] gap-4" style={{ fontFamily: "var(--font-mono)" }}>
+              <span>© {new Date().getFullYear()} Akhil Ajay. All rights reserved.</span>
+              <span>Designed & Built with React & Tailwind</span>
+            </div>
+
+            {/* The trigger button (Changes to Resume after first play) */}
+            {revealStep === 0 && (
+              <button 
+                onClick={handleTriggerClick}
+                className="mt-8 text-[11px] text-[#111111] hover:text-[#00d8ff] transition-colors duration-700 cursor-pointer uppercase tracking-widest outline-none"
+                style={{ fontFamily: "var(--font-mono)" }}
+              >
+                {hasPlayed ? "Resume" : "End Credits"}
+              </button>
+            )}
+
+            {/* Secret Easter Egg Area */}
+            {revealStep > 0 && (
+              <div className="w-full max-w-2xl flex flex-col items-center justify-center gap-8 mt-16 min-h-[100px]">
+                
+                {/* Typing Stage */}
+                {revealStep === 1 && (
+                  <div className="text-[#00d8ff] text-[24px] sm:text-[32px] font-medium tracking-widest uppercase drop-shadow-[0_0_15px_rgba(0,216,255,0.6)]" style={{ fontFamily: "var(--font-mono)" }}>
+                    {dragonText}<span className="blink-cursor inline-block w-[12px] h-[1em] bg-[#00d8ff] align-middle ml-2"></span>
+                  </div>
+                )}
+                
+                {/* Video Reveal Stage */}
+                {revealStep === 2 && (
+                  <div 
+                    className="w-full rounded-2xl overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(0,216,255,0.1)] cursor-pointer animate-[fadeIn_1s_ease-out_forwards]"
+                    onClick={handleVideoClick}
+                    title="Click to hide video"
+                  >
+                    <video 
+                      ref={outroVideoRef}
+                      src="vidssave.com It's Blank Meme Template HD 1080P.mp4" 
+                      loop
+                      playsInline
+                      className="w-full h-auto"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </footer>
+        );
+      };
+
+      // ---------------- Main App Component ----------------
+      const App = () => {
+        useScrollReveal();
+        return (
+          <>
             <Navbar />
-            <Hero />
-            <div className="relative z-10 bg-[#0a0a0a] shadow-[0_-15px_60px_rgba(0,0,0,0.8)]">
+            <main>
+              <Hero />
               <About />
               <Projects />
               <Skills />
               <Experience />
               <Education />
-              <Contact />
-            </div>
-          </div>
+            </main>
+            <Contact />
+          </>
         );
-      }
+      };
 
-      // ---------------- Render Root ----------------
-      const root = createRoot(document.getElementById("root"));
+      const root = createRoot(document.getElementById('root'));
       root.render(<App />);
     </script>
   </body>
