@@ -493,7 +493,9 @@
         const outroVideoRef = useRef(null);
         
         // Track states
-        const [revealStep, setRevealStep] = useState(0); // 0: Hidden, 2: Video
+        const [revealStep, setRevealStep] = useState(0); // 0: Hidden, 1: Typing, 2: Video
+        const [dragonText, setDragonText] = useState("");
+        const [hasPlayed, setHasPlayed] = useState(false); // Tracks if the video has been revealed before
 
         // HIDE TO BACKSTAGE ON SCROLL UP
         useEffect(() => {
@@ -519,6 +521,27 @@
           return () => window.removeEventListener('scroll', handleScroll);
         }, [revealStep]);
 
+        // Typewriter Effect for the hidden easter egg
+        useEffect(() => {
+          if (revealStep === 1) {
+            const fullText = "I'm Dragon Warrior";
+            let i = 0;
+            const interval = setInterval(() => {
+              setDragonText(fullText.slice(0, i + 1));
+              i++;
+              if (i === fullText.length) {
+                clearInterval(interval);
+                // Pause for a moment after typing before showing the video
+                setTimeout(() => {
+                  setRevealStep(2);
+                  setHasPlayed(true); // Mark as played so future clicks can skip typing
+                }, 1200);
+              }
+            }, 120);
+            return () => clearInterval(interval);
+          }
+        }, [revealStep]);
+
         // Auto-play video when revealed
         useEffect(() => {
           if (revealStep === 2 && outroVideoRef.current) {
@@ -534,9 +557,15 @@
           }
         };
 
-        // Handle the trigger button logic (Immediately open the video)
+        // Handle the trigger button logic
         const handleTriggerClick = () => {
-          setRevealStep(2);
+          if (hasPlayed) {
+            // If they have already seen the typewriter, skip straight to the video
+            setRevealStep(2);
+          } else {
+            // First time clicking Resume, show the typing animation
+            setRevealStep(1);
+          }
         };
 
         return (
@@ -562,7 +591,7 @@
               <span>Designed & Built with React & Tailwind</span>
             </div>
 
-            {/* The Resume button */}
+            {/* The Resume button is now ALWAYS labeled "Resume" */}
             {revealStep === 0 && (
               <button 
                 onClick={handleTriggerClick}
@@ -573,9 +602,16 @@
               </button>
             )}
 
-            {/* Video Reveal Area */}
+            {/* Secret Easter Egg Area */}
             {revealStep > 0 && (
               <div className="w-full max-w-2xl flex flex-col items-center justify-center gap-8 mt-16 min-h-[100px]">
+                
+                {/* Typing Stage */}
+                {revealStep === 1 && (
+                  <div className="text-[#00d8ff] text-[24px] sm:text-[32px] font-medium tracking-widest uppercase drop-shadow-[0_0_15px_rgba(0,216,255,0.6)]" style={{ fontFamily: "var(--font-mono)" }}>
+                    {dragonText}<span className="blink-cursor inline-block w-[12px] h-[1em] bg-[#00d8ff] align-middle ml-2"></span>
+                  </div>
+                )}
                 
                 {/* Video Reveal Stage */}
                 {revealStep === 2 && (
